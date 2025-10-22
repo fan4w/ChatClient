@@ -3,14 +3,14 @@ from ChatClient import ChatClient
 if __name__ == "__main__":
     print("Initializing ChatClient with config.json")
     client = ChatClient(config_path="config.json")
-    
+
     models = client.get_available_models()
     print("Available models:")
     for model in models:
         print(f"- {model['name']} (ID: {model['id']}, server by: {model['server']})")
-    
-    print("\nSetting model to ID 1")
-    client.set_model_by_id(1)
+
+    print("\nSetting model to deepseek-chat")
+    client.set_model("deepseek-chat")
     selected_model = client.get_selected_model()
     if selected_model:
         print(
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     # json chat example and init from env
     print("\n\nRe-initializing ChatClient from environment variables.")
     client = ChatClient()
-    
+
     print("\n\nSetting system prompt for JSON output.")
     json_system_prompt = """
         The user will provide some exam text. Please parse the "question" and "answer" and output them in JSON format.

@@ -3,6 +3,7 @@ import json
 import os
 from dataclasses import dataclass
 from openai import OpenAI
+from functools import singledispatchmethod
 
 
 @dataclass
@@ -93,6 +94,18 @@ class ChatClient:
             for model in self.config.values()
         ]
 
+    @singledispatchmethod
+    def set_model(self, model_identifier: any) -> None:
+        """
+        根据ID或名称设置要使用的模型
+        Args:
+            model_identifier: 模型的ID或名称
+        """
+        raise ValueError(
+            f"Unsupported type for model_identifier: {type(model_identifier)}"
+        )
+
+    @set_model.register
     def set_model_by_id(self, model_identifier: int) -> None:
         """
         设置要使用的模型
@@ -100,12 +113,46 @@ class ChatClient:
             model_identifier: 模型的ID或名称
         """
         for model in self.config.values():
-            if model_identifier in (model.id, model.name):
+            if model_identifier == model.id:
                 self.selected_model = model
                 # 初始化对应的client
                 self.client = OpenAI(api_key=model.api_key, base_url=model.url)
                 return
         raise ValueError(f"Model {model_identifier} not found in config")
+
+    @set_model.register
+    def set_model_by_name(self, model_name: str) -> None:
+        """
+        根据设置要使用的模型
+        Args:
+            model_identifier: 模型的名称
+        """
+        for model in self.config.values():
+            if model_name == model.name:
+                self.selected_model = model
+                # 初始化对应的client
+                self.client = OpenAI(api_key=model.api_key, base_url=model.url)
+                return
+        raise ValueError(f"Model {model_name} not found in config")
+
+    def set_model_by_name_and_server(
+        self, model_identifier: str, server_name: str
+    ) -> None:
+        """
+        根据名称和服务器名称设置要使用的模型
+        Args:
+            model_identifier: 模型的ID或名称
+            server_name: 服务名称
+        """
+        for model in self.config.values():
+            if model_identifier == model.name and server_name == model.server:
+                self.selected_model = model
+                # 初始化对应的client
+                self.client = OpenAI(api_key=model.api_key, base_url=model.url)
+                return
+        raise ValueError(
+            f"Model {model_identifier} with server {server_name} not found in config"
+        )
 
     def get_selected_model(self) -> Optional[ModelConfig]:
         """获取当前选择的模型配置"""

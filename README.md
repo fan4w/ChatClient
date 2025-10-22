@@ -38,7 +38,10 @@ client = ChatClient(config_path="config.json")
 `ChatClient` 会根据输入的 `base_url` 和 `api_key` 获取可用的模型列表，
 **默认**使用获取到的模型列表中的第一个
 
-目前仅支持通过 `id` 来配置使用的模型，`ChatClient` 提供了接口来获取当前可用的模型，模型信息包括：
+支持通过 `id` , `name`来配置使用的模型，对于有多个模型提供商的情况，
+可以指定模型提供商和模型，来选择要使用的模型。
+
+`ChatClient` 提供了接口来获取当前可用的模型，模型信息包括：
 
 - name，模型名称，此字段对应获取到的 `model.id`
 - id，模型ID，根据获取到的顺序，`ChatClient`自动分配，从 1 开始
@@ -54,12 +57,25 @@ models = client.get_available_models()
 # 遍历可用模型列表
 for model in models:
     print(f"- {model['name']} (ID: {model['id']}, server by: {model['server']})")
-# 根据 ID 选择使用的模型
-client.set_model_by_id(1)
+# 根据名字选择使用的模型
+client.set_model_by_name("deepseek-chat")
 # 获取当前使用的模型信息
 selected_model = client.get_selected_model()
 # 输出获取到的模型信息
 print(f"Selected model: {selected_model.name} (ID: {selected_model.id}, server by: {selected_model.server})")
+```
+
+还可以使用以下接口选择使用的模型：
+
+```python
+# 通过模型列表中的 ID 选择
+client.set_model_by_id(1)
+# 支持泛型，可以根据 ID 或者模型名称选择
+client.set_model(1)
+# 或
+client.set_model("deepseek-chat")
+# 也可以指定模型提供商
+client.set_model_by_name_and_server("deepseek-chat", "deepseek")
 ```
 
 ## 与 LLM 进行对话
